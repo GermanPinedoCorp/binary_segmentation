@@ -136,7 +136,7 @@ def main():
     parser.add_argument('-i', help='Source read image path', required=True)
     parser.add_argument('-d', help='Destiny write image path', required=True)
     parser.add_argument('-m', help='Model file', required=True)
-    parser.add_argument('-s', help='Image size', required=True)
+    parser.add_argument('-s', help='Image size', required=True, type=int)
     args = parser.parse_args()
     Read_path = args.i
     Write_path = args.d
