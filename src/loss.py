@@ -30,8 +30,8 @@ class BinaryCrossEntropyLoss(nn.Module):
         return "binary_cross_entropy"
 
     def forward(self, inputs, targets):
-        target1 = targets.squeeze(1).long().to(self.device)
-        binary = self.BCE(inputs.to(self.device), target1)
+        target1 = targets.squeeze(1).float().to(self.device)
+        binary = self.BCE(inputs.squeeze(1).to(self.device), target1)
         return binary
 
 

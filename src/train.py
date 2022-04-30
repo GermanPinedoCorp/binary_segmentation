@@ -16,7 +16,7 @@ from torch.optim.lr_scheduler import StepLR, ExponentialLR
 from loss import WCEGeneralizedDiceLoss, DiceLoss, CrossEntropyLoss, BinaryCrossEntropyLoss
 # import torch.utils.tensorboard
 from pytorch_model_summary import summary as sm
-
+from torchmetrics import Accuracy
 
 def main():
     logger, checkpoint_path, version = initialize()
@@ -41,8 +41,8 @@ def main():
     Building model 
     """
     
-    models_class = SegmentationModels(device, in_channels=3, img_size=img_size, n_classes=n_classes)
-    model, preprocess_input = models_class.Unet_backbone(encoder_name='resnet18', encoder_weights='imagenet')
+    models_class = SegmentationModels(device, in_channels=1, img_size=img_size, n_classes=n_classes)
+    model, preprocess_input = models_class.UNet(feature_start=32, layers=4)
     try:
         name_model = model.__name__
     except:
@@ -53,7 +53,6 @@ def main():
     pytorch_total_params = sum(p.numel() for p in model.parameters())
     print(preprocess_input)
     logger.info(f'Total_params:{pytorch_total_params}')
-    sys.exit()
     """ 
     Getting loader
     """
@@ -64,7 +63,7 @@ def main():
                                        batch_size=cfg.BATCH_SIZE,
                                        num_workers=cfg.NUM_WORKERS,
                                        pin_memory=True,
-                                       preprocess_input=preprocess_input
+                                       preprocess_input=None
                                        )
     
     if len(gpus_ids) > 1:
@@ -75,8 +74,9 @@ def main():
     """
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay, betas=(B1, B2))
     # loss_fn = WeightedCrossEntropyDice(class_weights=class_weights, device=device)
-    loss_fn = DiceLoss(device=device)
-    metrics = mIoU(device)
+    # loss_fn = DiceLoss(device=device)
+    loss_fn = nn.BCEWithLogitsLoss()
+    metrics = Accuracy()
     if cfg.SCHEDULER == 'step':
         scheduler = StepLR(optimizer=optimizer, step_size=cfg.STEP_SIZE, gamma=cfg.GAMMA)
     if cfg.SCHEDULER == 'cosine':
@@ -111,8 +111,8 @@ def main():
     logger.info('-------------------- Finished Train ---------------------')
     logger.info('******************* Start evaluation  *******************')
     load_best_model = torch.load(checkpoint_path + 'model.pth')
-    loss_eval = eval(load_best_model, val_loader, loss_fn, device)
-    print([loss_eval])
+    loss_eval, acc_eval = eval(load_best_model, val_loader, device)
+    print([loss_eval, acc_eval])
 
 def initialize():
     """
