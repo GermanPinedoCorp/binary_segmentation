@@ -96,7 +96,6 @@ def crop_retina(file_model, img_file, write_path, img_size):
     image = np.expand_dims(img, axis=0)
     image = np.expand_dims(image, axis=0)
     image = torch.tensor(image, device='cuda', dtype=torch.float)
-    print(image.shape)
     pred = model(image)
     pred = pred.detach().cpu().squeeze(0).squeeze(0).numpy()
     pred = np.where(pred > .5, 1, 0).astype('float')
