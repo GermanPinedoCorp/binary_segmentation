@@ -112,7 +112,7 @@ def validation(model, loader, loss_fn, metric, device, iter_val, writer, iter_pl
             y = y.type(torch.long).to(device)
             y_pred = model(x)
             loss = loss_fn(y_pred, y.float())
-            m0 = acc(y_pred, y)
+            m0 = acc(y_pred.detach().cpu(), y.detach().cpu())
             # accumulate metrics and loss items
             valid_iou += m0.mean()
             valid_loss += loss.item()
@@ -137,7 +137,7 @@ def eval(model, loader, device):
             y = y.type(torch.long).to(device)
             y_pred = model(x)
             loss = loss_fn(y_pred, y.float())
-            m0 = acc(y_pred, y)
+            m0 = acc(y_pred.detach().cpu(), y.detach().cpu())
             # accumulate metrics and loss items
             eval_loss += loss.item()
             eval_acc += m0.item()

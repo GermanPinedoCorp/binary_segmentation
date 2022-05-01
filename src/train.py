@@ -42,7 +42,7 @@ def main():
     """
     
     models_class = SegmentationModels(device, in_channels=1, img_size=img_size, n_classes=n_classes)
-    model, preprocess_input = models_class.UNet(feature_start=32, layers=4)
+    model, preprocess_input = models_class.UNet(feature_start=32, layers=3)
     try:
         name_model = model.__name__
     except:
