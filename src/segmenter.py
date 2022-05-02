@@ -100,10 +100,11 @@ def crop_retina(file_model, img_file, write_path, img_size):
     pred = pred.detach().cpu().squeeze(0).squeeze(0).numpy()
     pred = np.where(pred > .5, 1, 0).astype('float')
     pred = Image.fromarray(pred)
-    pred = pred.filter(ImageFilter.MinFilter(11))
+    pred = pred.filter(ImageFilter.MinFilter(3))
     pred = remove_remaining(pred)
     pred = pred.resize((h, w))
     pred = np.array(pred) / 255.
+    pred1 = (pred * 255).astype(np.uint8)
     pos = np.where(pred)
     if is_retina_mask_empty(pos):
         print('Invalid image!')
@@ -116,9 +117,11 @@ def crop_retina(file_model, img_file, write_path, img_size):
     img_mult = np.multiply(img_orig / 255., np.array(pred))
     crop = img_mult[ymin:ymax, xmin:xmax]
     crop = add_zerosboxes(crop)
+    crop = (crop * 255).astype(np.uint8)
     crop = Image.fromarray(crop)
-    crop.save(write_path + filename)
-    #pred.save('pred.png')
+    crop.save(write_path + 'Images/' + filename)
+    pred1 = Image.fromarray(pred1)
+    pred1.save(write_path + 'Masks/' + filename)
     return crop
 
 
@@ -141,10 +144,14 @@ def main():
     Write_path = args.d
     file_model = args.m
     image_size = args.s
-    exp = 'jpg', 'JPG', 'png', 'PNG', 'bmp'
+    exp = 'jpeg', 'jpg', 'JPG', 'png', 'PNG', 'bmp'
     files = get_filenames(Read_path, exp)
     for img_file in tqdm(files):
-        crop_retina(file_model, img_file, Write_path, image_size)
+        try:
+            crop_retina(file_model, img_file, Write_path, image_size)
+        except:
+            print(img_file)
+            pass
 
 if __name__ == '__main__':
     main()

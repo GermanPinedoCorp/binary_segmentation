@@ -6,3 +6,11 @@ checkpoints/
 __pycache__/
 logs/
 new_dataset/
+kaggle_crop/*
+kaggle/*
+imss_new/*
+IMSS/*
+D4/*
+D1/*
+residual/*
+kaggle_DR.rar
